@@ -1,3 +1,4 @@
+alert("script.js aktif") ;
 let accounts = JSON.parse(localStorage.getItem("robloxAccounts")) || [];
 
 
