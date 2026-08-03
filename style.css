@@ -1,372 +1,89 @@
-/* ===========================
-   Roblox Account Manager
-   Modern UI
-=========================== */
-
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
 body{
-    background:linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb);
-    min-height:100vh;
-    color:#fff;
-    overflow-x:hidden;
-}
-
-.bg{
-    position:fixed;
-    inset:0;
-    background:radial-gradient(circle at top,#60a5fa33,transparent 60%);
-    z-index:-1;
+    background: #111827;
+    color: white;
+    margin: 0;
+    padding: 20px;
 }
 
 .container{
-    width:95%;
-    max-width:1200px;
-    margin:auto;
-    padding:30px 15px;
+    max-width: 500px;
+    margin: auto;
 }
 
-header{
-    text-align:center;
-    margin-bottom:30px;
+h1{
+    text-align: center;
+    color: #60a5fa;
 }
 
-header h1{
-    font-size:35px;
-    font-weight:700;
+.form-box{
+    background: #1f2937;
+    padding: 20px;
+    border-radius: 15px;
 }
 
-header p{
-    margin-top:8px;
-    color:#dbeafe;
+
+input{
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
 }
 
-.topbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    margin-bottom:25px;
-    flex-wrap:wrap;
-}
-
-.search{
-    flex:1;
-    display:flex;
-    align-items:center;
-    background:rgba(255,255,255,.12);
-    backdrop-filter:blur(20px);
-    border-radius:15px;
-    padding:0 15px;
-}
-
-.search i{
-    color:#fff;
-}
-
-.search input{
-    flex:1;
-    border:none;
-    background:none;
-    outline:none;
-    color:white;
-    padding:14px;
-    font-size:15px;
-}
-
-.search input::placeholder{
-    color:#ddd;
-}
-
-.add{
-    background:#3b82f6;
-    color:white;
-    border:none;
-    padding:14px 22px;
-    border-radius:15px;
-    cursor:pointer;
-    font-weight:600;
-    transition:.25s;
-}
-
-.add:hover{
-    transform:translateY(-2px);
-    background:#2563eb;
-}
-
-.info{
-    display:flex;
-    margin-bottom:25px;
-}
-
-.box{
-    background:rgba(255,255,255,.1);
-    backdrop-filter:blur(15px);
-    border-radius:20px;
-    padding:20px;
-    min-width:180px;
-}
-
-.box h2{
-    font-size:35px;
-}
-
-.box span{
-    color:#ddd;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-    gap:20px;
-}
-
-.card{
-    background:rgba(255,255,255,.12);
-    backdrop-filter:blur(18px);
-    border-radius:20px;
-    padding:20px;
-    transition:.25s;
-    border:1px solid rgba(255,255,255,.1);
-}
-
-.card:hover{
-    transform:translateY(-6px);
-}
-
-.card h3{
-    margin-bottom:12px;
-    font-size:20px;
-}
-
-.card p{
-    margin:7px 0;
-    color:#e5e7eb;
-    word-break:break-word;
-}
-
-.actions{
-    display:flex;
-    gap:10px;
-    margin-top:18px;
-}
-
-.actions button{
-    flex:1;
-    border:none;
-    padding:11px;
-    border-radius:12px;
-    cursor:pointer;
-    color:white;
-    font-weight:600;
-    transition:.2s;
-}
-
-.detailBtn{
-    background:#2563eb;
-}
-
-.editBtn{
-    background:#f59e0b;
-}
-
-.deleteBtn{
-    background:#ef4444;
-}
-
-.actions button:hover{
-    transform:scale(.97);
-}
-
-.modal{
-    position:fixed;
-    inset:0;
-    display:none;
-    justify-content:center;
-    align-items:center;
-    background:rgba(0,0,0,.55);
-    padding:15px;
-}
-
-.modal-content{
-    width:100%;
-    max-width:470px;
-    background:#111827;
-    border-radius:22px;
-    padding:25px;
-    animation:popup .25s;
-}
-
-@keyframes popup{
-    from{
-        transform:scale(.8);
-        opacity:0;
-    }
-    to{
-        transform:scale(1);
-        opacity:1;
-    }
-}
-
-.modal-content h2{
-    text-align:center;
-    margin-bottom:18px;
-}
-
-.modal-content input{
-    width:100%;
-    padding:14px;
-    border:none;
-    outline:none;
-    background:#1f2937;
-    color:white;
-    border-radius:12px;
-    margin-bottom:15px;
-}
-
-.passwordBox{
-    display:flex;
-    gap:8px;
-}
-
-.passwordBox input{
-    flex:1;
-}
-
-.passwordBox button{
-    width:55px;
-    border:none;
-    border-radius:12px;
-    background:#374151;
-    color:white;
-    cursor:pointer;
-}
-
-.buttons{
-    display:flex;
-    gap:10px;
-    margin-top:15px;
-    flex-wrap:wrap;
-}
-
-.buttons button{
-    flex:1;
-    padding:13px;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-    font-weight:600;
-}
-
-.save{
-    background:#22c55e;
-    color:white;
-}
-
-.cancel{
-    background:#ef4444;
-    color:white;
-}
-
-.detail p{
-    margin:10px 0;
-}
-
-@media(max-width:700px){
-
-header h1{
-font-size:28px;
-}
-
-.topbar{
-flex-direction:column;
-}
-
-.add{
-width:100%;
-}
-
-.box{
-width:100%;
-}
-
-.actions{
-flex-direction:column;
-}
-
-.buttons{
-flex-direction:column;
-}
-
-}    outline:none;
-}
-
-textarea{
-    height:100px;
-    resize:none;
-}
 
 button{
-    padding:12px;
-    border:none;
-    border-radius:8px;
-    background:#00a2ff;
-    color:white;
-    cursor:pointer;
-    font-weight:bold;
-    transition:.2s;
+    width: 100%;
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
 }
+
 
 button:hover{
-    opacity:.85;
+    background: #1d4ed8;
 }
 
-#search{
-    margin:20px 0;
+
+#accountList{
+    margin-top: 15px;
 }
+
 
 .card{
-    background:#1b1b1b;
-    border-radius:10px;
-    padding:15px;
-    margin-bottom:15px;
+    background: #1f2937;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 12px;
 }
 
-.card h3{
-    color:#00a2ff;
-    margin-bottom:8px;
+
+.card button{
+    width: 32%;
+    font-size: 13px;
+    margin-right: 1%;
 }
 
-.card p{
-    margin:4px 0;
-    word-break:break-word;
+
+.detail{
+    background: #059669;
 }
 
-.actions{
-    margin-top:10px;
-    display:flex;
-    gap:10px;
-}
 
 .edit{
-    background:#ff9800;
+    background: #f59e0b;
 }
+
 
 .delete{
-    background:#ff3b30;
-}
-
-@media(max-width:700px){
-    .container{
-        padding:15px;
-    }
-
-    .actions{
-        flex-direction:column;
-    }
+    background: #dc2626;
 }
