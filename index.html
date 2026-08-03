@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox Account Manager</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Roblox Account Manager</h1>
+
+    <div class="form">
+        <input type="text" id="username" placeholder="Username Roblox">
+        <input type="password" id="password" placeholder="Password">
+        <input type="text" id="display" placeholder="Display Name">
+        <input type="email" id="email" placeholder="Email">
+        <input type="text" id="tag" placeholder="Tag (Main/Alt)">
+        <textarea id="note" placeholder="Catatan"></textarea>
+
+        <button onclick="saveAccount()">Simpan</button>
+    </div>
+
+    <hr>
+
+    <input type="text" id="search" placeholder="Cari akun..." onkeyup="searchAccount()">
+
+    <div id="accountList"></div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
