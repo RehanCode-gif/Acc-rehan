@@ -1,203 +1,286 @@
-alert("script.js aktif") ;
-let accounts = JSON.parse(localStorage.getItem("robloxAccounts")) || [];
+// LocalStorage Keys
+const STORAGE_KEY = 'rbx_accounts_vault_v2';
+const PIN_KEY = 'rbx_vault_pin';
 
+let accounts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+let masterPin = localStorage.getItem(PIN_KEY) || null;
 
-// Tambah akun
-function addAccount(){
+// Initialization
+document.addEventListener('DOMContentLoaded', () => {
+  checkPinSetup();
+  renderAccounts();
+  lucide.createIcons();
+});
 
-    let username = document.getElementById("username").value;
-    let password = document.getElementById("password").value;
-    let gmail = document.getElementById("gmail").value;
+/* --- MASTER PIN SYSTEM --- */
+function checkPinSetup() {
+  const pinOverlay = document.getElementById('pinOverlay');
+  const pinTitle = document.getElementById('pinTitle');
+  const pinSub = document.getElementById('pinSub');
 
+  if (!masterPin) {
+    pinTitle.innerText = 'Buat PIN Keamanan';
+    pinSub.innerText = 'Buat 4-digit PIN baru untuk mengamankan akunmu';
+    pinOverlay.classList.remove('hidden');
+  } else {
+    pinTitle.innerText = 'Vault Terkunci';
+    pinSub.innerText = 'Masukkan 4-digit PIN untuk membuka akun';
+    pinOverlay.classList.remove('hidden');
+  }
+}
 
-    if(username === "" || password === "" || gmail === ""){
-        alert("Semua data wajib diisi!");
-        return;
+function handlePinSubmit(e) {
+  e.preventDefault();
+  const inputPin = document.getElementById('pinInput').value.trim();
+
+  if (!masterPin) {
+    if (inputPin.length === 4) {
+      masterPin = inputPin;
+      localStorage.setItem(PIN_KEY, masterPin);
+      document.getElementById('pinOverlay').classList.add('hidden');
+      alert('PIN berhasil dibuat!');
+    } else {
+      alert('PIN harus terdiri dari 4 digit angka.');
     }
+  } else {
+    if (inputPin === masterPin) {
+      document.getElementById('pinOverlay').classList.add('hidden');
+      document.getElementById('pinInput').value = '';
+    } else {
+      alert('PIN salah!');
+      document.getElementById('pinInput').value = '';
+    }
+  }
+}
 
+function resetPinPrompt() {
+  const currentPin = prompt('Masukkan PIN Lama Anda:');
+  if (currentPin === masterPin) {
+    const newPin = prompt('Masukkan 4 Digit PIN Baru:');
+    if (newPin && newPin.length === 4) {
+      masterPin = newPin;
+      localStorage.setItem(PIN_KEY, newPin);
+      alert('PIN Berhasil Diperbarui!');
+    } else {
+      alert('Gagal! PIN Baru harus 4 digit.');
+    }
+  } else {
+    alert('PIN Lama Salah.');
+  }
+}
 
-    let data = {
-        username: username,
-        password: password,
-        gmail: gmail
-    };
+/* --- CRUD OPERATIONS --- */
+function saveAccount(e) {
+  e.preventDefault();
+  const id = document.getElementById('accountId').value;
+  const usn = document.getElementById('inputUsn').value.trim();
+  const pw = document.getElementById('inputPw').value.trim();
+  const gmail = document.getElementById('inputGmail').value.trim();
+  const tag = document.getElementById('inputTag').value;
+  const spec = document.getElementById('inputSpec').value.trim();
 
+  if (id) {
+    accounts = accounts.map(acc => acc.id === id ? { id, usn, pw, gmail, tag, spec } : acc);
+  } else {
+    accounts.push({
+      id: Date.now().toString(),
+      usn,
+      pw,
+      gmail,
+      tag,
+      spec
+    });
+  }
 
-    accounts.push(data);
+  saveToStorage();
+  closeModal('accountModal');
+  renderAccounts();
+}
 
-
-    localStorage.setItem(
-        "robloxAccounts",
-        JSON.stringify(accounts)
-    );
-
-
-    alert("Akun berhasil ditambahkan");
-
-
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("gmail").value = "";
-
-
+function deleteAccount(id) {
+  if (confirm('Yakin ingin menghapus akun ini?')) {
+    accounts = accounts.filter(acc => acc.id !== id);
+    saveToStorage();
     renderAccounts();
-
+  }
 }
 
-
-
-// Sensor Gmail
-function sensorGmail(gmail){
-
-    return gmail.substring(0,3) + "***";
+function saveToStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
 }
 
+/* --- RENDERING --- */
+function renderAccounts() {
+  const grid = document.getElementById('accountGrid');
+  const emptyState = document.getElementById('emptyState');
+  const searchVal = document.getElementById('searchInput').value.toLowerCase();
 
+  const filtered = accounts.filter(acc => 
+    acc.usn.toLowerCase().includes(searchVal) || 
+    acc.spec.toLowerCase().includes(searchVal)
+  );
 
-// Menampilkan akun
-function renderAccounts(){
+  document.getElementById('totalCount').innerText = `${accounts.length} Akun`;
 
-    let list = document.getElementById("accountList");
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    return;
+  }
 
-    list.innerHTML = "";
-
-
-    accounts.forEach((acc,index)=>{
-
-
-        list.innerHTML += `
-
-        <div class="card">
-
-            <h3>${acc.username}</h3>
-
-            <p>
-            Gmail: ${sensorGmail(acc.gmail)}
-            </p>
-
-
-            <button class="detail"
-            onclick="detailAccount(${index})">
-            Detail
+  emptyState.classList.add('hidden');
+  grid.innerHTML = filtered.map(acc => `
+    <div class="bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-2xl p-5 flex flex-col justify-between transition group shadow-lg">
+      <div>
+        <div class="flex items-center justify-between pb-3 border-b border-gray-800/80 mb-3">
+          <div class="flex items-center gap-2">
+            ${getTagBadge(acc.tag)}
+            <h3 class="font-bold text-base text-white truncate max-w-[140px]">${escapeHtml(acc.usn)}</h3>
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="editAccount('${acc.id}')" class="p-1.5 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition">
+              <i data-lucide="pencil" class="w-4 h-4"></i>
             </button>
-
-
-            <button class="edit"
-            onclick="editAccount(${index})">
-            Edit
+            <button onclick="deleteAccount('${acc.id}')" class="p-1.5 text-gray-400 hover:text-red-400 rounded-md hover:bg-gray-800 transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
-
-
-            <button class="delete"
-            onclick="deleteAccount(${index})">
-            Hapus
-            </button>
-
-
+          </div>
         </div>
 
-        `;
+        <div class="space-y-2 mb-4 text-xs font-mono">
+          <div class="flex justify-between items-center bg-gray-800/40 px-2.5 py-1.5 rounded border border-gray-800">
+            <span class="text-gray-500">PW:</span>
+            <span class="text-gray-400">••••••••••••</span>
+          </div>
+          <div class="flex justify-between items-center bg-gray-800/40 px-2.5 py-1.5 rounded border border-gray-800">
+            <span class="text-gray-500">Gmail:</span>
+            <span class="text-gray-400">${maskEmail(acc.gmail)}</span>
+          </div>
+        </div>
 
+        <div class="mb-4">
+          <span class="text-[10px] uppercase font-semibold text-gray-500 tracking-wider block mb-1">Spesifikasi</span>
+          <p class="text-xs text-gray-300 line-clamp-2 bg-gray-950/50 p-2 rounded border border-gray-800/50">
+            ${acc.spec ? escapeHtml(acc.spec) : '<span class="italic text-gray-600">Tidak ada spesifikasi</span>'}
+          </p>
+        </div>
+      </div>
 
-    });
+      <button 
+        onclick="showDetail('${acc.id}')" 
+        class="w-full bg-gray-800 hover:bg-red-600 hover:text-white text-gray-300 text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2 border border-gray-700/50 hover:border-red-600"
+      >
+        <i data-lucide="eye" class="w-4 h-4"></i> Lihat Detail
+      </button>
+    </div>
+  `).join('');
 
-
+  lucide.createIcons();
 }
 
-
-
-// Detail akun
-function detailAccount(index){
-
-    let acc = accounts[index];
-
-
-    alert(
-`Username : ${acc.username}
-
-Password : ${acc.password}
-
-Gmail : ${acc.gmail}`
-    );
-
+function getTagBadge(tag) {
+  if (tag === 'Utama') {
+    return `<span class="bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded">UTAMA</span>`;
+  } else if (tag === 'Sold') {
+    return `<span class="bg-gray-500/10 border border-gray-500/20 text-gray-400 text-[10px] font-bold px-2 py-0.5 rounded">SOLD</span>`;
+  }
+  return `<span class="bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded">READY</span>`;
 }
 
+/* --- MODALS & EXTRAS --- */
+function showDetail(id) {
+  const acc = accounts.find(a => a.id === id);
+  if (!acc) return;
 
+  document.getElementById('detailUsn').innerText = acc.usn;
+  document.getElementById('detailPw').innerText = acc.pw;
+  document.getElementById('detailGmail').innerText = acc.gmail;
+  document.getElementById('detailSpec').innerText = acc.spec || '-';
 
-// Edit akun
-function editAccount(index){
+  openModal('detailModal');
+}
 
-    let acc = accounts[index];
+function openAddModal() {
+  document.getElementById('accountForm').reset();
+  document.getElementById('accountId').value = '';
+  document.getElementById('modalTitle').innerText = 'Tambah Akun Roblox';
+  openModal('accountModal');
+}
 
+function editAccount(id) {
+  const acc = accounts.find(a => a.id === id);
+  if (!acc) return;
 
-    let username = prompt(
-        "Username baru:",
-        acc.username
-    );
+  document.getElementById('accountId').value = acc.id;
+  document.getElementById('inputUsn').value = acc.usn;
+  document.getElementById('inputPw').value = acc.pw;
+  document.getElementById('inputGmail').value = acc.gmail;
+  document.getElementById('inputTag').value = acc.tag || 'Ready';
+  document.getElementById('inputSpec').value = acc.spec;
+  document.getElementById('modalTitle').innerText = 'Edit Akun Roblox';
 
+  openModal('accountModal');
+}
 
-    let password = prompt(
-        "Password baru:",
-        acc.password
-    );
+function openModal(id) {
+  document.getElementById(id).classList.remove('hidden');
+}
 
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
 
-    let gmail = prompt(
-        "Gmail baru:",
-        acc.gmail
-    );
+/* --- EXPORT / IMPORT JSON --- */
+function exportData() {
+  if (accounts.length === 0) {
+    alert('Tidak ada data akun untuk diexport.');
+    return;
+  }
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(accounts, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `Roblox_Vault_Backup_${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
 
-
-    if(username && password && gmail){
-
-        accounts[index] = {
-            username,
-            password,
-            gmail
-        };
-
-
-        localStorage.setItem(
-            "robloxAccounts",
-            JSON.stringify(accounts)
-        );
-
-
+function importData(event) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (Array.isArray(imported)) {
+        accounts = imported;
+        saveToStorage();
         renderAccounts();
-
+        alert('Data akun berhasil dimuat!');
+      } else {
+        alert('Format file JSON tidak valid.');
+      }
+    } catch (err) {
+      alert('Gagal membaca file JSON.');
     }
-
+  };
+  if (event.target.files[0]) {
+    reader.readAsText(event.target.files[0]);
+  }
 }
 
-
-
-// Hapus akun
-function deleteAccount(index){
-
-
-    let yakin = confirm(
-        "Hapus akun ini?"
-    );
-
-
-    if(yakin){
-
-        accounts.splice(index,1);
-
-
-        localStorage.setItem(
-            "robloxAccounts",
-            JSON.stringify(accounts)
-        );
-
-
-        renderAccounts();
-
-    }
-
+/* --- UTILITIES --- */
+function maskEmail(email) {
+  if (!email) return '••••@••••.com';
+  const parts = email.split('@');
+  if (parts.length < 2) return '••••••••';
+  return parts[0].substring(0, 2) + '••••@' + parts[1];
 }
 
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
 
-
-// Jalankan saat website dibuka
-renderAccounts();
+function copyToClipboard(elementId) {
+  const text = document.getElementById(elementId).innerText;
+  navigator.clipboard.writeText(text);
+  alert('Disalin ke clipboard!');
+}
