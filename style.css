@@ -1,89 +1,36 @@
-*{
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+body {
+  background-color: #0b0f19;
+  color: #f3f4f6;
+  font-family: 'Inter', sans-serif;
 }
 
-body{
-    background: #111827;
-    color: white;
-    margin: 0;
-    padding: 20px;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.container{
-    max-width: 500px;
-    margin: auto;
+::-webkit-scrollbar-track {
+  background: #0b0f19;
 }
 
-h1{
-    text-align: center;
-    color: #60a5fa;
+::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 4px;
 }
 
-.form-box{
-    background: #1f2937;
-    padding: 20px;
-    border-radius: 15px;
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
 }
 
-
-input{
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border: none;
-    outline: none;
+/* Typography Overrides */
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
 }
 
-
-button{
-    width: 100%;
-    padding: 12px;
-    background: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-
-button:hover{
-    background: #1d4ed8;
-}
-
-
-#accountList{
-    margin-top: 15px;
-}
-
-
-.card{
-    background: #1f2937;
-    padding: 15px;
-    margin-top: 10px;
-    border-radius: 12px;
-}
-
-
-.card button{
-    width: 32%;
-    font-size: 13px;
-    margin-right: 1%;
-}
-
-
-.detail{
-    background: #059669;
-}
-
-
-.edit{
-    background: #f59e0b;
-}
-
-
-.delete{
-    background: #dc2626;
+/* Card Glow Effect */
+.group:hover {
+  box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
 }
