@@ -216,3 +216,17 @@ function clearForm() {
 }
 
 renderAccounts();
+
+const modal = document.getElementById("modal");
+
+function openModal() {
+    modal.style.display = "flex";
+}
+
+function closeModal() {
+    modal.style.display = "none";
+
+    document.getElementById("username").value = "";
+    document.getElementById("gmail").value = "";
+    document.getElementById("password").value = "";
+}
