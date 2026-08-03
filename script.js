@@ -1,73 +1,13 @@
 // LocalStorage Keys
 const STORAGE_KEY = 'rbx_accounts_vault_v2';
-const PIN_KEY = 'rbx_vault_pin';
 
 let accounts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-let masterPin = localStorage.getItem(PIN_KEY) || null;
 
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
-  checkPinSetup();
   renderAccounts();
   lucide.createIcons();
 });
-
-/* --- MASTER PIN SYSTEM --- */
-function checkPinSetup() {
-  const pinOverlay = document.getElementById('pinOverlay');
-  const pinTitle = document.getElementById('pinTitle');
-  const pinSub = document.getElementById('pinSub');
-
-  if (!masterPin) {
-    pinTitle.innerText = 'Buat PIN Keamanan';
-    pinSub.innerText = 'Buat 4-digit PIN baru untuk mengamankan akunmu';
-    pinOverlay.classList.remove('hidden');
-  } else {
-    pinTitle.innerText = 'Vault Terkunci';
-    pinSub.innerText = 'Masukkan 4-digit PIN untuk membuka akun';
-    pinOverlay.classList.remove('hidden');
-  }
-}
-
-function handlePinSubmit(e) {
-  e.preventDefault();
-  const inputPin = document.getElementById('pinInput').value.trim();
-
-  if (!masterPin) {
-    if (inputPin.length === 4) {
-      masterPin = inputPin;
-      localStorage.setItem(PIN_KEY, masterPin);
-      document.getElementById('pinOverlay').classList.add('hidden');
-      alert('PIN berhasil dibuat!');
-    } else {
-      alert('PIN harus terdiri dari 4 digit angka.');
-    }
-  } else {
-    if (inputPin === masterPin) {
-      document.getElementById('pinOverlay').classList.add('hidden');
-      document.getElementById('pinInput').value = '';
-    } else {
-      alert('PIN salah!');
-      document.getElementById('pinInput').value = '';
-    }
-  }
-}
-
-function resetPinPrompt() {
-  const currentPin = prompt('Masukkan PIN Lama Anda:');
-  if (currentPin === masterPin) {
-    const newPin = prompt('Masukkan 4 Digit PIN Baru:');
-    if (newPin && newPin.length === 4) {
-      masterPin = newPin;
-      localStorage.setItem(PIN_KEY, newPin);
-      alert('PIN Berhasil Diperbarui!');
-    } else {
-      alert('Gagal! PIN Baru harus 4 digit.');
-    }
-  } else {
-    alert('PIN Lama Salah.');
-  }
-}
 
 /* --- CRUD OPERATIONS --- */
 function saveAccount(e) {
@@ -187,7 +127,6 @@ function getTagBadge(tag) {
   return `<span class="bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded">READY</span>`;
 }
 
-/* --- MODALS & EXTRAS --- */
 function showDetail(id) {
   const acc = accounts.find(a => a.id === id);
   if (!acc) return;
@@ -230,44 +169,6 @@ function closeModal(id) {
   document.getElementById(id).classList.add('hidden');
 }
 
-/* --- EXPORT / IMPORT JSON --- */
-function exportData() {
-  if (accounts.length === 0) {
-    alert('Tidak ada data akun untuk diexport.');
-    return;
-  }
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(accounts, null, 2));
-  const downloadAnchor = document.createElement('a');
-  downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `Roblox_Vault_Backup_${new Date().toISOString().slice(0,10)}.json`);
-  document.body.appendChild(downloadAnchor);
-  downloadAnchor.click();
-  downloadAnchor.remove();
-}
-
-function importData(event) {
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const imported = JSON.parse(e.target.result);
-      if (Array.isArray(imported)) {
-        accounts = imported;
-        saveToStorage();
-        renderAccounts();
-        alert('Data akun berhasil dimuat!');
-      } else {
-        alert('Format file JSON tidak valid.');
-      }
-    } catch (err) {
-      alert('Gagal membaca file JSON.');
-    }
-  };
-  if (event.target.files[0]) {
-    reader.readAsText(event.target.files[0]);
-  }
-}
-
-/* --- UTILITIES --- */
 function maskEmail(email) {
   if (!email) return '••••@••••.com';
   const parts = email.split('@');
