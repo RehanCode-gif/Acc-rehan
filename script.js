@@ -1,40 +1,143 @@
+// ===================================
+// Roblox Account Manager
+// Local Storage
+// ===================================
+
 let accounts = JSON.parse(localStorage.getItem("robloxAccounts")) || [];
 let editIndex = -1;
+let currentDetail = -1;
 
-function saveData() {
+const accountList = document.getElementById("accountList");
+const totalAccount = document.getElementById("totalAccount");
+
+function saveLocal() {
     localStorage.setItem("robloxAccounts", JSON.stringify(accounts));
 }
 
-function renderAccounts(list = accounts) {
-    const accountList = document.getElementById("accountList");
-    accountList.innerHTML = "";
+function updateTotal() {
+    totalAccount.textContent = accounts.length;
+}
 
-    if (list.length === 0) {
-        accountList.innerHTML = "<p>Tidak ada akun tersimpan.</p>";
+function maskEmail(email) {
+    const parts = email.split("@");
+
+    if (parts.length !== 2) return email;
+
+    const name = parts[0];
+    const domain = parts[1];
+
+    if (name.length <= 3) {
+        return name + "***@" + domain;
+    }
+
+    return name.substring(0,3) +
+        "*".repeat(name.length-3) +
+        "@" +
+        domain;
+}
+
+function renderAccounts(data = accounts){
+
+    accountList.innerHTML="";
+
+    updateTotal();
+
+    if(data.length===0){
+
+        accountList.innerHTML=`
+        <div class="card">
+            <h3>Tidak ada akun.</h3>
+        </div>`;
+
         return;
     }
 
-    list.forEach((acc, index) => {
-        accountList.innerHTML += `
-        <div class="card">
-            <h3>${acc.username}</h3>
-            <p><b>Password:</b> ${acc.password}</p>
-            <p><b>Display:</b> ${acc.display}</p>
-            <p><b>Email:</b> ${acc.email}</p>
-            <p><b>Tag:</b> ${acc.tag}</p>
-            <p><b>Catatan:</b> ${acc.note}</p>
+    data.forEach((acc,index)=>{
 
-            <div class="actions">
-                <button class="edit" onclick="editAccount(${index})">Edit</button>
-                <button class="delete" onclick="deleteAccount(${index})">Hapus</button>
-            </div>
-        </div>`;
+        accountList.innerHTML+=`
+
+<div class="card">
+
+<h3>👤 ${acc.username}</h3>
+
+<p>📧 ${maskEmail(acc.gmail)}</p>
+
+<p>🔒 ************</p>
+
+<div class="actions">
+
+<button class="detailBtn"
+onclick="showDetail(${index})">
+
+📄 Detail
+
+</button>
+
+<button class="editBtn"
+onclick="editAccount(${index})">
+
+✏️ Edit
+
+</button>
+
+<button class="deleteBtn"
+onclick="deleteAccount(${index})">
+
+🗑 Hapus
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
     });
+
 }
 
-function saveAccount() {
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
+function saveAccount(){
+
+    const username=document.getElementById("username").value.trim();
+    const gmail=document.getElementById("gmail").value.trim();
+    const password=document.getElementById("password").value.trim();
+
+    if(!username||!gmail||!password){
+
+        alert("Lengkapi semua data.");
+
+        return;
+
+    }
+
+    const obj={
+        username,
+        gmail,
+        password
+    };
+
+    if(editIndex==-1){
+
+        accounts.push(obj);
+
+    }else{
+
+        accounts[editIndex]=obj;
+
+        editIndex=-1;
+
+    }
+
+    saveLocal();
+
+    renderAccounts();
+
+    closeModal();
+
+}
+
+renderAccounts();    const password = document.getElementById("password").value.trim();
     const display = document.getElementById("display").value.trim();
     const email = document.getElementById("email").value.trim();
     const tag = document.getElementById("tag").value.trim();
