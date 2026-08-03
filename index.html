@@ -3,30 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roblox Account Manager</title>
+  <title>Roblox Account Vault</title>
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
+  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    body {
-      background-color: #0b0f19;
-      color: #f3f4f6;
-      font-family: 'Inter', sans-serif;
-    }
-  </style>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="min-h-screen pb-12">
 
-  <!-- Header -->
+  <!-- Modal Lock / PIN Screen (Tampil jika terisi PIN) -->
+  <div id="pinOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-sm p-6 text-center shadow-2xl">
+      <div class="w-12 h-12 bg-red-600/10 border border-red-500/20 rounded-xl flex items-center justify-center text-red-500 mx-auto mb-4">
+        <i data-lucide="lock" class="w-6 h-6"></i>
+      </div>
+      <h2 id="pinTitle" class="text-lg font-bold text-white mb-1">Vault Terkunci</h2>
+      <p id="pinSub" class="text-xs text-gray-400 mb-6">Masukkan 4-digit PIN master untuk membuka akun</p>
+      
+      <form onsubmit="handlePinSubmit(event)" class="space-y-4">
+        <input 
+          type="password" 
+          id="pinInput" 
+          maxlength="4" 
+          placeholder="••••" 
+          class="w-32 mx-auto text-center text-2xl tracking-[0.5em] font-mono bg-gray-800 border border-gray-700 rounded-xl py-2 text-white focus:outline-none focus:border-red-500"
+          required
+        >
+        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl text-sm transition">
+          Buka Akses
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Header Navigation -->
   <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="p-2 bg-red-600 rounded-lg text-white font-black tracking-wider text-xl shadow-lg shadow-red-600/30">
+        <div class="p-2.5 bg-red-600 rounded-xl text-white font-black tracking-wider text-xl shadow-lg shadow-red-600/30">
           RBX
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-tight text-white">Roblox Vault</h1>
+          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            Roblox Vault <span class="text-[10px] bg-gray-800 text-gray-400 border border-gray-700 px-2 py-0.5 rounded-full font-normal">v2.0</span>
+          </h1>
           <p class="text-xs text-gray-400">Pengelola & Penyimpan Akun Roblox</p>
         </div>
       </div>
@@ -35,15 +58,15 @@
         <input 
           type="text" 
           id="searchInput" 
-          placeholder="Cari username atau spesifikasi..." 
-          class="w-full sm:w-64 bg-gray-800 border border-gray-700 text-sm rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500 transition"
+          placeholder="Cari usn / spec..." 
+          class="w-full sm:w-56 bg-gray-800 border border-gray-700 text-sm rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500 transition"
           oninput="renderAccounts()"
         >
         <button 
           onclick="openAddModal()" 
           class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition shrink-0 shadow-lg shadow-red-600/20"
         >
-          <i data-lucide="plus" class="w-4 h-4"></i> Tambah Akun
+          <i data-lucide="plus" class="w-4 h-4"></i> Tambah
         </button>
       </div>
     </div>
@@ -52,34 +75,49 @@
   <!-- Container Utama -->
   <main class="max-w-6xl mx-auto px-4 mt-8">
     
-    <!-- Stats Brief -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-      <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
-        <span class="text-gray-400 text-sm">Total Akun Tersimpan</span>
-        <span id="totalCount" class="text-2xl font-bold text-red-500">0</span>
+    <!-- Top Bar Controls (Stats & Backup/Restore) -->
+    <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
+      <div class="flex items-center gap-4 w-full md:w-auto">
+        <div class="bg-gray-900/60 border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3 w-full md:w-auto">
+          <i data-lucide="shield-check" class="w-5 h-5 text-red-500"></i>
+          <div>
+            <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Total Tersimpan</span>
+            <span id="totalCount" class="text-lg font-bold text-white">0 Akun</span>
+          </div>
+        </div>
       </div>
-      <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
-        <span class="text-gray-400 text-sm">Status Penyimpanan</span>
-        <span class="text-xs font-semibold px-2.5 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20">Lokal Browser</span>
+
+      <!-- Backup Tools -->
+      <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+        <button onclick="exportData()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 text-xs font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i> Export JSON
+        </button>
+        <label class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 text-xs font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i> Import JSON
+          <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+        </label>
+        <button onclick="resetPinPrompt()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 p-2 rounded-lg transition" title="Ganti PIN">
+          <i data-lucide="key" class="w-4 h-4"></i>
+        </button>
       </div>
     </div>
 
     <!-- Grid Akun -->
     <div id="accountGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Data akun akan di-render di sini -->
+      <!-- Data render via JavaScript -->
     </div>
 
     <!-- Empty State -->
     <div id="emptyState" class="hidden text-center py-16 bg-gray-900/30 border border-dashed border-gray-800 rounded-2xl">
       <i data-lucide="folder-open" class="w-12 h-12 text-gray-600 mx-auto mb-3"></i>
       <h3 class="text-base font-semibold text-gray-300">Belum Ada Akun</h3>
-      <p class="text-sm text-gray-500 mt-1">Klik tombol "Tambah Akun" di atas untuk menyimpan akun baru.</p>
+      <p class="text-sm text-gray-500 mt-1">Klik tombol "+ Tambah" di atas untuk menyimpan akun baru.</p>
     </div>
 
   </main>
 
-  <!-- Modal Tambah / Edit Akun -->
-  <div id="accountModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+  <!-- Modal Form Tambah/Edit -->
+  <div id="accountModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
       <h2 id="modalTitle" class="text-lg font-bold text-white mb-4">Tambah Akun Roblox</h2>
       
@@ -93,17 +131,26 @@
 
         <div>
           <label class="block text-xs font-medium text-gray-400 mb-1">Password</label>
-          <input type="text" id="inputPw" required placeholder="Password akun..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
+          <input type="text" id="inputPw" required placeholder="Password..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
         </div>
 
         <div>
           <label class="block text-xs font-medium text-gray-400 mb-1">Gmail / Email Link</label>
-          <input type="email" id="inputGmail" required placeholder="Contoh: user@gmail.com" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
+          <input type="email" id="inputGmail" required placeholder="user@gmail.com" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1">Spesifikasi / Detail Akun</label>
-          <textarea id="inputSpec" rows="3" placeholder="Contoh: Level Max, Perm Dough, V4 Full Gear, Robux 500..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500 resize-none"></textarea>
+          <label class="block text-xs font-medium text-gray-400 mb-1">Status Akun</label>
+          <select id="inputTag" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
+            <option value="Ready">Ready / Available</option>
+            <option value="Utama">Akun Utama / Main</option>
+            <option value="Sold">Sold / Terjual</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1">Spesifikasi / Detail</label>
+          <textarea id="inputSpec" rows="3" placeholder="Contoh: Lv Max, Perm Dough, Gamepass..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500 resize-none"></textarea>
         </div>
 
         <div class="flex justify-end gap-3 mt-6">
@@ -114,8 +161,8 @@
     </div>
   </div>
 
-  <!-- Modal Detail (Untuk Mengintip PW & Gmail) -->
-  <div id="detailModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+  <!-- Modal Detail Unmask -->
+  <div id="detailModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
       <div class="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
         <h2 class="text-lg font-bold text-white flex items-center gap-2">
@@ -126,9 +173,9 @@
         </button>
       </div>
 
-      <div class="space-y-4">
+      <div class="space-y-3">
         <div>
-          <span class="text-xs text-gray-500 block mb-1">Username</span>
+          <span class="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Username</span>
           <div class="flex items-center justify-between bg-gray-800/80 p-2.5 rounded-lg border border-gray-700">
             <span id="detailUsn" class="font-mono text-sm font-semibold text-white"></span>
             <button onclick="copyToClipboard('detailUsn')" class="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1">
@@ -138,7 +185,7 @@
         </div>
 
         <div>
-          <span class="text-xs text-gray-500 block mb-1">Password</span>
+          <span class="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Password</span>
           <div class="flex items-center justify-between bg-gray-800/80 p-2.5 rounded-lg border border-gray-700">
             <span id="detailPw" class="font-mono text-sm font-semibold text-red-400"></span>
             <button onclick="copyToClipboard('detailPw')" class="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1">
@@ -148,7 +195,7 @@
         </div>
 
         <div>
-          <span class="text-xs text-gray-500 block mb-1">Gmail</span>
+          <span class="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Gmail</span>
           <div class="flex items-center justify-between bg-gray-800/80 p-2.5 rounded-lg border border-gray-700">
             <span id="detailGmail" class="font-mono text-sm font-semibold text-blue-400"></span>
             <button onclick="copyToClipboard('detailGmail')" class="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1">
@@ -158,7 +205,7 @@
         </div>
 
         <div>
-          <span class="text-xs text-gray-500 block mb-1">Spesifikasi Lengkap</span>
+          <span class="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Spesifikasi Lengkap</span>
           <div id="detailSpec" class="bg-gray-800/40 p-3 rounded-lg border border-gray-800 text-xs text-gray-300 leading-relaxed whitespace-pre-wrap"></div>
         </div>
       </div>
@@ -169,189 +216,7 @@
     </div>
   </div>
 
-  <script>
-    // System Storage State
-    let accounts = JSON.parse(localStorage.getItem('rbx_accounts')) || [];
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-      renderAccounts();
-      lucide.createIcons();
-    });
-
-    // Save/Update Account
-    function saveAccount(e) {
-      e.preventDefault();
-      const id = document.getElementById('accountId').value;
-      const usn = document.getElementById('inputUsn').value.trim();
-      const pw = document.getElementById('inputPw').value.trim();
-      const gmail = document.getElementById('inputGmail').value.trim();
-      const spec = document.getElementById('inputSpec').value.trim();
-
-      if (id) {
-        // Edit existing
-        accounts = accounts.map(acc => acc.id === id ? { id, usn, pw, gmail, spec } : acc);
-      } else {
-        // Add new
-        const newAcc = {
-          id: Date.now().toString(),
-          usn,
-          pw,
-          gmail,
-          spec
-        };
-        accounts.push(newAcc);
-      }
-
-      localStorage.setItem('rbx_accounts', JSON.stringify(accounts));
-      closeModal('accountModal');
-      renderAccounts();
-    }
-
-    // Delete Account
-    function deleteAccount(id) {
-      if (confirm('Apakah Anda yakin ingin menghapus akun ini?')) {
-        accounts = accounts.filter(acc => acc.id !== id);
-        localStorage.setItem('rbx_accounts', JSON.stringify(accounts));
-        renderAccounts();
-      }
-    }
-
-    // Render Account Cards
-    function renderAccounts() {
-      const grid = document.getElementById('accountGrid');
-      const emptyState = document.getElementById('emptyState');
-      const searchVal = document.getElementById('searchInput').value.toLowerCase();
-      
-      const filtered = accounts.filter(acc => 
-        acc.usn.toLowerCase().includes(searchVal) || 
-        acc.spec.toLowerCase().includes(searchVal)
-      );
-
-      document.getElementById('totalCount').innerText = accounts.length;
-
-      if (filtered.length === 0) {
-        grid.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        return;
-      }
-
-      emptyState.classList.add('hidden');
-      grid.innerHTML = filtered.map(acc => `
-        <div class="bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-2xl p-5 flex flex-col justify-between transition group shadow-lg">
-          <div>
-            <!-- Header Card -->
-            <div class="flex items-center justify-between pb-3 border-b border-gray-800/80 mb-3">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-red-600/10 border border-red-500/20 rounded-lg flex items-center justify-center text-red-500 font-bold text-xs">
-                  ID
-                </div>
-                <h3 class="font-bold text-base text-white truncate max-w-[160px]">${escapeHtml(acc.usn)}</h3>
-              </div>
-              <div class="flex items-center gap-1">
-                <button onclick="editAccount('${acc.id}')" class="p-1.5 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition">
-                  <i data-lucide="pencil" class="w-4 h-4"></i>
-                </button>
-                <button onclick="deleteAccount('${acc.id}')" class="p-1.5 text-gray-400 hover:text-red-400 rounded-md hover:bg-gray-800 transition">
-                  <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Sensor Info -->
-            <div class="space-y-2 mb-4 text-xs font-mono">
-              <div class="flex justify-between items-center bg-gray-800/40 px-2.5 py-1.5 rounded border border-gray-800">
-                <span class="text-gray-500">PW:</span>
-                <span class="text-gray-400">••••••••••••</span>
-              </div>
-              <div class="flex justify-between items-center bg-gray-800/40 px-2.5 py-1.5 rounded border border-gray-800">
-                <span class="text-gray-500">Gmail:</span>
-                <span class="text-gray-400">${maskEmail(acc.gmail)}</span>
-              </div>
-            </div>
-
-            <!-- Specs Preview -->
-            <div class="mb-4">
-              <span class="text-[10px] uppercase font-semibold text-gray-500 tracking-wider block mb-1">Spesifikasi</span>
-              <p class="text-xs text-gray-300 line-clamp-2 bg-gray-950/50 p-2 rounded border border-gray-800/50">
-                ${acc.spec ? escapeHtml(acc.spec) : '<span class="italic text-gray-600">Tidak ada spesifikasi</span>'}
-              </p>
-            </div>
-          </div>
-
-          <!-- Bottom Button -->
-          <button 
-            onclick="showDetail('${acc.id}')" 
-            class="w-full bg-gray-800 hover:bg-red-600 hover:text-white text-gray-300 text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2 border border-gray-700/50 hover:border-red-600"
-          >
-            <i data-lucide="eye" class="w-4 h-4"></i> Lihat Detail
-          </button>
-        </div>
-      `).join('');
-
-      lucide.createIcons();
-    }
-
-    // Show Detail Modal
-    function showDetail(id) {
-      const acc = accounts.find(a => a.id === id);
-      if (!acc) return;
-
-      document.getElementById('detailUsn').innerText = acc.usn;
-      document.getElementById('detailPw').innerText = acc.pw;
-      document.getElementById('detailGmail').innerText = acc.gmail;
-      document.getElementById('detailSpec').innerText = acc.spec || '-';
-
-      openModal('detailModal');
-    }
-
-    // Modal Helpers
-    function openAddModal() {
-      document.getElementById('accountForm').reset();
-      document.getElementById('accountId').value = '';
-      document.getElementById('modalTitle').innerText = 'Tambah Akun Roblox';
-      openModal('accountModal');
-    }
-
-    function editAccount(id) {
-      const acc = accounts.find(a => a.id === id);
-      if (!acc) return;
-
-      document.getElementById('accountId').value = acc.id;
-      document.getElementById('inputUsn').value = acc.usn;
-      document.getElementById('inputPw').value = acc.pw;
-      document.getElementById('inputGmail').value = acc.gmail;
-      document.getElementById('inputSpec').value = acc.spec;
-      document.getElementById('modalTitle').innerText = 'Edit Akun Roblox';
-
-      openModal('accountModal');
-    }
-
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    // Utility Masking & Safety
-    function maskEmail(email) {
-      if (!email) return '••••@••••.com';
-      const parts = email.split('@');
-      if (parts.length < 2) return '••••••••';
-      return parts[0].substring(0, 2) + '••••@' + parts[1];
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
-
-    function copyToClipboard(elementId) {
-      const text = document.getElementById(elementId).innerText;
-      navigator.clipboard.writeText(text);
-      alert('Berhasil disalin ke clipboard!');
-    }
-  </script>
+  <!-- Custom Script -->
+  <script src="script.js"></script>
 </body>
 </html>
