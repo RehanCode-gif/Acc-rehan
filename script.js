@@ -1,26 +1,25 @@
-// ===================================
+// =============================
 // Roblox Account Manager
-// Local Storage
-// ===================================
+// Bagian 1
+// =============================
 
 let accounts = JSON.parse(localStorage.getItem("robloxAccounts")) || [];
 let editIndex = -1;
-let currentDetail = -1;
+let detailIndex = -1;
 
-const accountList = document.getElementById("accountList");
-const totalAccount = document.getElementById("totalAccount");
+const modal = document.getElementById("modal");
+const detailModal = document.getElementById("detailModal");
 
-function saveLocal() {
+function saveData() {
     localStorage.setItem("robloxAccounts", JSON.stringify(accounts));
 }
 
 function updateTotal() {
-    totalAccount.textContent = accounts.length;
+    document.getElementById("totalAccount").textContent = accounts.length;
 }
 
 function maskEmail(email) {
     const parts = email.split("@");
-
     if (parts.length !== 2) return email;
 
     const name = parts[0];
@@ -30,203 +29,373 @@ function maskEmail(email) {
         return name + "***@" + domain;
     }
 
-    return name.substring(0,3) +
-        "*".repeat(name.length-3) +
-        "@" +
-        domain;
+    return name.substring(0, 3) +
+        "*".repeat(name.length - 3) +
+        "@" + domain;
 }
-
-function renderAccounts(data = accounts){
-
-    accountList.innerHTML="";
-
-    updateTotal();
-
-    if(data.length===0){
-
-        accountList.innerHTML=`
-        <div class="card">
-            <h3>Tidak ada akun.</h3>
-        </div>`;
-
-        return;
-    }
-
-    data.forEach((acc,index)=>{
-
-        accountList.innerHTML+=`
-
-<div class="card">
-
-<h3>👤 ${acc.username}</h3>
-
-<p>📧 ${maskEmail(acc.gmail)}</p>
-
-<p>🔒 ************</p>
-
-<div class="actions">
-
-<button class="detailBtn"
-onclick="showDetail(${index})">
-
-📄 Detail
-
-</button>
-
-<button class="editBtn"
-onclick="editAccount(${index})">
-
-✏️ Edit
-
-</button>
-
-<button class="deleteBtn"
-onclick="deleteAccount(${index})">
-
-🗑 Hapus
-
-</button>
-
-</div>
-
-</div>
-
-`;
-
-    });
-
-}
-
-function saveAccount(){
-
-    const username=document.getElementById("username").value.trim();
-    const gmail=document.getElementById("gmail").value.trim();
-    const password=document.getElementById("password").value.trim();
-
-    if(!username||!gmail||!password){
-
-        alert("Lengkapi semua data.");
-
-        return;
-
-    }
-
-    const obj={
-        username,
-        gmail,
-        password
-    };
-
-    if(editIndex==-1){
-
-        accounts.push(obj);
-
-    }else{
-
-        accounts[editIndex]=obj;
-
-        editIndex=-1;
-
-    }
-
-    saveLocal();
-
-    renderAccounts();
-
-    closeModal();
-
-}
-
-renderAccounts();    const password = document.getElementById("password").value.trim();
-    const display = document.getElementById("display").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const tag = document.getElementById("tag").value.trim();
-    const note = document.getElementById("note").value.trim();
-
-    if (!username || !password) {
-        alert("Username dan Password wajib diisi!");
-        return;
-    }
-
-    const data = {
-        username,
-        password,
-        display,
-        email,
-        tag,
-        note
-    };
-
-    if (editIndex === -1) {
-        accounts.push(data);
-    } else {
-        accounts[editIndex] = data;
-        editIndex = -1;
-    }
-
-    saveData();
-    clearForm();
-    renderAccounts();
-}
-
-function editAccount(index) {
-    const acc = accounts[index];
-
-    document.getElementById("username").value = acc.username;
-    document.getElementById("password").value = acc.password;
-    document.getElementById("display").value = acc.display;
-    document.getElementById("email").value = acc.email;
-    document.getElementById("tag").value = acc.tag;
-    document.getElementById("note").value = acc.note;
-
-    editIndex = index;
-}
-
-function deleteAccount(index) {
-    if (confirm("Hapus akun ini?")) {
-        accounts.splice(index, 1);
-        saveData();
-        renderAccounts();
-    }
-}
-
-function searchAccount() {
-    const keyword = document
-        .getElementById("search")
-        .value
-        .toLowerCase();
-
-    const result = accounts.filter(acc =>
-        acc.username.toLowerCase().includes(keyword) ||
-        acc.display.toLowerCase().includes(keyword) ||
-        acc.email.toLowerCase().includes(keyword) ||
-        acc.tag.toLowerCase().includes(keyword)
-    );
-
-    renderAccounts(result);
-}
-
-function clearForm() {
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("display").value = "";
-    document.getElementById("email").value = "";
-    document.getElementById("tag").value = "";
-    document.getElementById("note").value = "";
-}
-
-renderAccounts();
-
-const modal = document.getElementById("modal");
 
 function openModal() {
     modal.style.display = "flex";
 }
 
 function closeModal() {
+
     modal.style.display = "none";
 
     document.getElementById("username").value = "";
     document.getElementById("gmail").value = "";
     document.getElementById("password").value = "";
+
+    editIndex = -1;
 }
+
+function togglePassword() {
+
+    const input = document.getElementById("password");
+    const eye = document.getElementById("eye");
+
+    if (input.type === "password") {
+        input.type = "text";
+        eye.className = "fa-solid fa-eye-slash";
+    } else {
+        input.type = "password";
+        eye.className = "fa-solid fa-eye";
+    }
+
+}
+
+function saveAccount() {
+
+    const username = document.getElementById("username").value.trim();
+    const gmail = document.getElementById("gmail").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!username || !gmail || !password) {
+        alert("Lengkapi semua data.");
+        return;
+    }
+
+    const account = {
+        username,
+        gmail,
+        password
+    };
+
+    if (editIndex === -1) {
+        accounts.push(account);
+    } else {
+        accounts[editIndex] = account;
+        editIndex = -1;
+    }
+
+    saveData();
+    renderAccounts();
+    closeModal();
+}
+
+// =============================
+// Roblox Account Manager
+// Bagian 2
+// =============================
+
+function renderAccounts(list = accounts) {
+
+    const accountList = document.getElementById("accountList");
+
+    accountList.innerHTML = "";
+
+    updateTotal();
+
+    if (list.length === 0) {
+        accountList.innerHTML = `
+        <div class="card">
+            <h3>Belum ada akun</h3>
+        </div>`;
+        return;
+    }
+
+    list.forEach((acc, index) => {
+
+        accountList.innerHTML += `
+        <div class="card">
+
+            <h3>👤 ${acc.username}</h3>
+
+            <p>📧 ${maskEmail(acc.gmail)}</p>
+
+            <p>🔒 ************</p>
+
+            <div class="actions">
+
+                <button class="detailBtn"
+                onclick="showDetail(${index})">
+                📄 Detail
+                </button>
+
+                <button class="editBtn"
+                onclick="editAccount(${index})">
+                ✏ Edit
+                </button>
+
+                <button class="deleteBtn"
+                onclick="deleteAccount(${index})">
+                🗑 Hapus
+                </button>
+
+            </div>
+
+        </div>
+        `;
+
+    });
+
+}
+
+function editAccount(index){
+
+    const acc = accounts[index];
+
+    document.getElementById("username").value = acc.username;
+    document.getElementById("gmail").value = acc.gmail;
+    document.getElementById("password").value = acc.password;
+
+    editIndex = index;
+
+    openModal();
+
+}
+
+function deleteAccount(index){
+
+    if(confirm("Hapus akun ini?")){
+
+        accounts.splice(index,1);
+
+        saveData();
+
+        renderAccounts();
+
+    }
+
+}
+
+function searchAccount(){
+
+    const key = document
+        .getElementById("search")
+        .value
+        .toLowerCase();
+
+    const result = accounts.filter(acc =>
+
+        acc.username.toLowerCase().includes(key)
+
+    );
+
+    renderAccounts(result);
+
+}
+
+renderAccounts();
+
+// =============================
+// Roblox Account Manager
+// Bagian 3
+// =============================
+
+
+let editIndex = -1;
+
+
+// =============================
+// Tambah / Simpan Akun
+// =============================
+
+function saveAccount(){
+
+    const username =
+    document.getElementById("username").value.trim();
+
+    const gmail =
+    document.getElementById("gmail").value.trim();
+
+    const password =
+    document.getElementById("password").value.trim();
+
+
+    if(username === "" || gmail === "" || password === ""){
+
+        alert("Isi semua data akun!");
+
+        return;
+
+    }
+
+
+    const data = {
+
+        username: username,
+        gmail: gmail,
+        password: password
+
+    };
+
+
+    if(editIndex === -1){
+
+        accounts.push(data);
+
+    }else{
+
+        accounts[editIndex] = data;
+
+        editIndex = -1;
+
+    }
+
+
+    saveData();
+
+    renderAccounts();
+
+    closeModal();
+
+    clearForm();
+
+}
+
+
+
+// =============================
+// Detail Akun
+// =============================
+
+function showDetail(index){
+
+    const acc = accounts[index];
+
+
+    alert(
+`
+👤 Username:
+${acc.username}
+
+📧 Gmail:
+${acc.gmail}
+
+🔑 Password:
+${acc.password}
+`
+    );
+
+}
+
+
+
+// =============================
+// Local Storage
+// =============================
+
+function saveData(){
+
+    localStorage.setItem(
+        "robloxAccounts",
+        JSON.stringify(accounts)
+    );
+
+}
+
+
+
+// =============================
+// Load Data
+// =============================
+
+function loadData(){
+
+    const data = localStorage.getItem(
+        "robloxAccounts"
+    );
+
+
+    if(data){
+
+        accounts = JSON.parse(data);
+
+    }else{
+
+        accounts = [];
+
+    }
+
+}
+
+
+
+// =============================
+// Total Akun
+// =============================
+
+function updateTotal(){
+
+    const total =
+    document.getElementById("total");
+
+
+    if(total){
+
+        total.innerHTML =
+        "Total Akun: " + accounts.length;
+
+    }
+
+}
+
+
+
+// =============================
+// Modal
+// =============================
+
+function openModal(){
+
+    document
+    .getElementById("modal")
+    .style.display = "flex";
+
+}
+
+
+function closeModal(){
+
+    document
+    .getElementById("modal")
+    .style.display = "none";
+
+}
+
+
+
+// =============================
+// Bersihkan Form
+// =============================
+
+function clearForm(){
+
+    document.getElementById("username").value = "";
+
+    document.getElementById("gmail").value = "";
+
+    document.getElementById("password").value = "";
+
+}
+
+
+
+// =============================
+// Jalankan Saat Website Dibuka
+// =============================
+
+loadData();
+
+renderAccounts();
