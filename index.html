@@ -1,186 +1,63 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roblox Account Manager</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="style.css">
+    <title>Roblox Account Manager</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
+    <link rel="stylesheet" href="style.css">
 </head>
+
 
 <body>
 
-<div class="bg"></div>
-
 <div class="container">
 
-<header>
+    <h1>Roblox Account Manager</h1>
 
-<h1><i class="fa-solid fa-cube"></i> Roblox Account Manager</h1>
 
-<p>Simpan akun Roblox kamu dengan Local Storage.</p>
+    <div class="form-box">
 
-</header>
+        <input 
+        type="text" 
+        id="username" 
+        placeholder="Username Roblox">
 
-<div class="topbar">
 
-<div class="search">
+        <input 
+        type="password" 
+        id="password" 
+        placeholder="Password">
 
-<i class="fa-solid fa-magnifying-glass"></i>
 
-<input
-type="text"
-id="search"
-placeholder="Cari Username..."
-onkeyup="searchAccount()">
+        <input 
+        type="email" 
+        id="gmail" 
+        placeholder="Gmail">
 
-</div>
 
-<button onclick="openModal()" class="add">
+        <button onclick="addAccount()">
+            Tambah Akun
+        </button>
 
-<i class="fa-solid fa-plus"></i>
+    </div>
 
-Tambah Akun
 
-</button>
+    <h2>Daftar Akun</h2>
 
-</div>
 
-<div class="info">
+    <div id="accountList">
 
-<div class="box">
+    </div>
 
-<h2 id="totalAccount">0</h2>
-
-<span>Total Akun</span>
 
 </div>
 
-</div>
-
-<div id="accountList" class="grid">
-
-<!-- Card muncul di sini -->
-
-</div>
-
-</div>
-
-<!-- Modal Tambah -->
-
-<div class="modal" id="modal">
-
-<div class="modal-content">
-
-<h2>Tambah Akun</h2>
-
-<input
-type="text"
-id="username"
-placeholder="Username Roblox">
-
-<input
-type="email"
-id="gmail"
-placeholder="Gmail">
-
-<div class="passwordBox">
-
-<input
-type="password"
-id="password"
-placeholder="Password">
-
-<button onclick="togglePassword()">
-
-<i id="eye" class="fa-solid fa-eye"></i>
-
-</button>
-
-</div>
-
-<div class="buttons">
-
-<button onclick="saveAccount()" class="save">
-
-Simpan
-
-</button>
-
-<button onclick="closeModal()" class="cancel">
-
-Batal
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- Modal Detail -->
-
-<div class="modal" id="detailModal">
-
-<div class="modal-content">
-
-<h2>Detail Akun</h2>
-
-<div class="detail">
-
-<p><b>Username</b></p>
-
-<p id="detailUsername"></p>
-
-<p><b>Gmail</b></p>
-
-<p id="detailGmail"></p>
-
-<p><b>Password</b></p>
-
-<p id="detailPassword"></p>
-
-</div>
-
-<div class="buttons">
-
-<button onclick="copyUsername()">
-
-Copy Username
-
-</button>
-
-<button onclick="copyGmail()">
-
-Copy Gmail
-
-</button>
-
-<button onclick="copyPassword()">
-
-Copy Password
-
-</button>
-
-<button onclick="closeDetail()">
-
-Tutup
-
-</button>
-
-</div>
-
-</div>
-
-</div>
 
 <script src="script.js"></script>
 
 </body>
+
 </html>
