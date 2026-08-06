@@ -1,36 +1,126 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
 
 body {
-  background-color: #0b0f19;
-  color: #f3f4f6;
-  font-family: 'Inter', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #111827, #2563eb);
+    color: white;
+    padding: 20px;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.container {
+    max-width: 600px;
+    margin: auto;
 }
 
-::-webkit-scrollbar-track {
-  background: #0b0f19;
+h1 {
+    text-align: center;
+    font-size: 28px;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #1f2937;
-  border-radius: 4px;
+.subtitle {
+    text-align: center;
+    color: #d1d5db;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+
+.form-box {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    margin-top: 20px;
 }
 
-/* Typography Overrides */
-.font-mono {
-  font-family: 'JetBrains Mono', monospace;
+
+input,
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    background: white;
+    color: black;
 }
 
-/* Card Glow Effect */
-.group:hover {
-  box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+
+textarea {
+    height: 90px;
+    resize: none;
+}
+
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #22c55e;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+
+button:hover {
+    opacity: 0.8;
+}
+
+
+.card {
+    background: rgba(255,255,255,0.12);
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 15px;
+}
+
+
+.card h3 {
+    margin: 0 0 10px;
+}
+
+
+.info {
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+
+.action {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+
+.action button {
+    flex: 1;
+    font-size: 14px;
+}
+
+
+.detail {
+    background: #3b82f6;
+}
+
+
+.edit {
+    background: #f59e0b;
+}
+
+
+.delete {
+    background: #ef4444;
+}
+
+
+.copy {
+    background: #8b5cf6;
 }
