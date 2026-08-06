@@ -1,222 +1,43 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roblox Account Vault</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Account Storage</title>
+
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="min-h-screen pb-12">
 
-  <!-- Modal Lock / PIN Screen (Tampil jika terisi PIN) -->
-  <div id="pinOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-sm p-6 text-center shadow-2xl">
-      <div class="w-12 h-12 bg-red-600/10 border border-red-500/20 rounded-xl flex items-center justify-center text-red-500 mx-auto mb-4">
-        <i data-lucide="lock" class="w-6 h-6"></i>
-      </div>
-      <h2 id="pinTitle" class="text-lg font-bold text-white mb-1">Vault Terkunci</h2>
-      <p id="pinSub" class="text-xs text-gray-400 mb-6">Masukkan 4-digit PIN master untuk membuka akun</p>
-      
-      <form onsubmit="handlePinSubmit(event)" class="space-y-4">
-        <input 
-          type="password" 
-          id="pinInput" 
-          maxlength="4" 
-          placeholder="••••" 
-          class="w-32 mx-auto text-center text-2xl tracking-[0.5em] font-mono bg-gray-800 border border-gray-700 rounded-xl py-2 text-white focus:outline-none focus:border-red-500"
-          required
-        >
-        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl text-sm transition">
-          Buka Akses
-        </button>
-      </form>
-    </div>
-  </div>
+<body>
 
-  <!-- Header Navigation -->
-  <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="p-2.5 bg-red-600 rounded-xl text-white font-black tracking-wider text-xl shadow-lg shadow-red-600/30">
-          RBX
-        </div>
-        <div>
-          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-            Roblox Vault <span class="text-[10px] bg-gray-800 text-gray-400 border border-gray-700 px-2 py-0.5 rounded-full font-normal">v2.0</span>
-          </h1>
-          <p class="text-xs text-gray-400">Pengelola & Penyimpan Akun Roblox</p>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-2 w-full sm:w-auto">
-        <input 
-          type="text" 
-          id="searchInput" 
-          placeholder="Cari usn / spec..." 
-          class="w-full sm:w-56 bg-gray-800 border border-gray-700 text-sm rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500 transition"
-          oninput="renderAccounts()"
-        >
-        <button 
-          onclick="openAddModal()" 
-          class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition shrink-0 shadow-lg shadow-red-600/20"
-        >
-          <i data-lucide="plus" class="w-4 h-4"></i> Tambah
-        </button>
-      </div>
-    </div>
-  </header>
+<div class="container">
 
-  <!-- Container Utama -->
-  <main class="max-w-6xl mx-auto px-4 mt-8">
-    
-    <!-- Top Bar Controls (Stats & Backup/Restore) -->
-    <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
-      <div class="flex items-center gap-4 w-full md:w-auto">
-        <div class="bg-gray-900/60 border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3 w-full md:w-auto">
-          <i data-lucide="shield-check" class="w-5 h-5 text-red-500"></i>
-          <div>
-            <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Total Tersimpan</span>
-            <span id="totalCount" class="text-lg font-bold text-white">0 Akun</span>
-          </div>
-        </div>
-      </div>
+    <h1>🎮 Roblox Account Storage</h1>
+    <p class="subtitle">Simpan akun Roblox kamu dengan aman</p>
 
-      <!-- Backup Tools -->
-      <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-        <button onclick="exportData()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 text-xs font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
-          <i data-lucide="download" class="w-3.5 h-3.5"></i> Export JSON
-        </button>
-        <label class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 text-xs font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
-          <i data-lucide="upload" class="w-3.5 h-3.5"></i> Import JSON
-          <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
-        </label>
-        <button onclick="resetPinPrompt()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 p-2 rounded-lg transition" title="Ganti PIN">
-          <i data-lucide="key" class="w-4 h-4"></i>
-        </button>
-      </div>
+    <div class="form-box">
+
+        <input type="text" id="username" placeholder="Username Roblox (contoh: rayhan)">
+
+        <input type="password" id="password" placeholder="Password Roblox">
+
+        <input type="email" id="gmail" placeholder="Gmail (contoh: ra*****@gmail.com)">
+
+        <textarea id="keterangan" placeholder="Keterangan akun"></textarea>
+
+        <button onclick="tambahAkun()">Tambah Akun</button>
+
     </div>
 
-    <!-- Grid Akun -->
-    <div id="accountGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Data render via JavaScript -->
-    </div>
 
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden text-center py-16 bg-gray-900/30 border border-dashed border-gray-800 rounded-2xl">
-      <i data-lucide="folder-open" class="w-12 h-12 text-gray-600 mx-auto mb-3"></i>
-      <h3 class="text-base font-semibold text-gray-300">Belum Ada Akun</h3>
-      <p class="text-sm text-gray-500 mt-1">Klik tombol "+ Tambah" di atas untuk menyimpan akun baru.</p>
-    </div>
+    <h2>Daftar Akun</h2>
 
-  </main>
+    <div id="listAkun"></div>
 
-  <!-- Modal Form Tambah/Edit -->
-  <div id="accountModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
-      <h2 id="modalTitle" class="text-lg font-bold text-white mb-4">Tambah Akun Roblox</h2>
-      
-      <form id="accountForm" onsubmit="saveAccount(event)" class="space-y-4">
-        <input type="hidden" id="accountId">
-        
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1">Username Roblox</label>
-          <input type="text" id="inputUsn" required placeholder="Contoh: BloxKnight99" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
-        </div>
+</div>
 
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1">Password</label>
-          <input type="text" id="inputPw" required placeholder="Password..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
-        </div>
 
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1">Gmail / Email Link</label>
-          <input type="email" id="inputGmail" required placeholder="user@gmail.com" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
-        </div>
+<script src="script.js"></script>
 
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1">Status Akun</label>
-          <select id="inputTag" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
-            <option value="Ready">Ready / Available</option>
-            <option value="Utama">Akun Utama / Main</option>
-            <option value="Sold">Sold / Terjual</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1">Spesifikasi / Detail</label>
-          <textarea id="inputSpec" rows="3" placeholder="Contoh: Lv Max, Perm Dough, Gamepass..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500 resize-none"></textarea>
-        </div>
-
-        <div class="flex justify-end gap-3 mt-6">
-          <button type="button" onclick="closeModal('accountModal')" class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition">Batal</button>
-          <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition">Simpan Akun</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Detail Unmask -->
-  <div id="detailModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
-      <div class="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
-        <h2 class="text-lg font-bold text-white flex items-center gap-2">
-          <i data-lucide="shield-check" class="w-5 h-5 text-red-500"></i> Detail Kredensial
-        </h2>
-        <button onclick="closeModal('detailModal')" class="text-gray-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3">
-        <div>
-          <span class="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Username</span>
-          <div class="flex items-center justify-between bg-gray-800/80 p-2.5 rounded-lg border border-gray-700">
-            <span id="detailUsn" class="font-mono text-sm font-semibold text-white"></span>
-            <button onclick="copyToClipboard('detailUsn')" class="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <span class="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Password</span>
-          <div class="flex items-center justify-between bg-gray-800/80 p-2.5 rounded-lg border border-gray-700">
-            <span id="detailPw" class="font-mono text-sm font-semibold text-red-400"></span>
-            <button onclick="copyToClipboard('detailPw')" class="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <span class="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Gmail</span>
-          <div class="flex items-center justify-between bg-gray-800/80 p-2.5 rounded-lg border border-gray-700">
-            <span id="detailGmail" class="font-mono text-sm font-semibold text-blue-400"></span>
-            <button onclick="copyToClipboard('detailGmail')" class="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <span class="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Spesifikasi Lengkap</span>
-          <div id="detailSpec" class="bg-gray-800/40 p-3 rounded-lg border border-gray-800 text-xs text-gray-300 leading-relaxed whitespace-pre-wrap"></div>
-        </div>
-      </div>
-
-      <div class="mt-6 pt-3 border-t border-gray-800 text-right">
-        <button onclick="closeModal('detailModal')" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm py-2 rounded-lg transition font-medium">Tutup</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Custom Script -->
-  <script src="script.js"></script>
 </body>
 </html>
