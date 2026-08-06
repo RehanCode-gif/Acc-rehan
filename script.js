@@ -1,187 +1,218 @@
-// LocalStorage Keys
-const STORAGE_KEY = 'rbx_accounts_vault_v2';
+let akun = JSON.parse(localStorage.getItem("akunRoblox")) || [];
 
-let accounts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+tampilkanAkun();
 
-// Initialization
-document.addEventListener('DOMContentLoaded', () => {
-  renderAccounts();
-  lucide.createIcons();
-});
 
-/* --- CRUD OPERATIONS --- */
-function saveAccount(e) {
-  e.preventDefault();
-  const id = document.getElementById('accountId').value;
-  const usn = document.getElementById('inputUsn').value.trim();
-  const pw = document.getElementById('inputPw').value.trim();
-  const gmail = document.getElementById('inputGmail').value.trim();
-  const tag = document.getElementById('inputTag').value;
-  const spec = document.getElementById('inputSpec').value.trim();
+function tambahAkun() {
 
-  if (id) {
-    accounts = accounts.map(acc => acc.id === id ? { id, usn, pw, gmail, tag, spec } : acc);
-  } else {
-    accounts.push({
-      id: Date.now().toString(),
-      usn,
-      pw,
-      gmail,
-      tag,
-      spec
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
+    let gmail = document.getElementById("gmail").value;
+    let keterangan = document.getElementById("keterangan").value;
+
+
+    if(username == "" || password == "") {
+        alert("Username dan Password Roblox wajib diisi!");
+        return;
+    }
+
+
+    let data = {
+        username: username,
+        password: password,
+        gmail: gmail,
+        keterangan: keterangan
+    };
+
+
+    akun.push(data);
+
+    localStorage.setItem("akunRoblox", JSON.stringify(akun));
+
+
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("gmail").value = "";
+    document.getElementById("keterangan").value = "";
+
+
+    tampilkanAkun();
+}
+
+
+
+function sensorGmail(gmail){
+
+    if(!gmail.includes("@")){
+        return gmail;
+    }
+
+    let bagian = gmail.split("@");
+
+    let nama = bagian[0];
+
+    if(nama.length <= 2){
+        return nama + "*****@" + bagian[1];
+    }
+
+    return nama.substring(0,2) + "*****@" + bagian[1];
+
+}
+
+
+
+function sensorPassword(){
+
+    return "********";
+}
+
+
+
+function tampilkanAkun(){
+
+    let list = document.getElementById("listAkun");
+
+    list.innerHTML = "";
+
+
+    akun.forEach((item,index)=>{
+
+
+        list.innerHTML += `
+
+        <div class="card">
+
+            <h3>🎮 ${item.username}</h3>
+
+            <div class="info">
+
+            <p>Password : ********</p>
+
+            <p>Gmail : ${sensorGmail(item.gmail)}</p>
+
+            <p>Keterangan : ${item.keterangan}</p>
+
+            </div>
+
+
+            <div class="action">
+
+            <button class="detail" onclick="detailAkun(${index})">
+            Detail
+            </button>
+
+
+            <button class="copy" onclick="copyAkun(${index})">
+            Copy
+            </button>
+
+
+            <button class="edit" onclick="editAkun(${index})">
+            Edit
+            </button>
+
+
+            <button class="delete" onclick="hapusAkun(${index})">
+            Hapus
+            </button>
+
+            </div>
+
+        </div>
+
+        `;
+
+
     });
-  }
 
-  saveToStorage();
-  closeModal('accountModal');
-  renderAccounts();
 }
 
-function deleteAccount(id) {
-  if (confirm('Yakin ingin menghapus akun ini?')) {
-    accounts = accounts.filter(acc => acc.id !== id);
-    saveToStorage();
-    renderAccounts();
-  }
+
+
+
+function detailAkun(index){
+
+    let item = akun[index];
+
+
+    alert(
+`Username : ${item.username}
+
+Password : ${item.password}
+
+Gmail : ${item.gmail}
+
+Keterangan : ${item.keterangan}`
+    );
+
 }
 
-function saveToStorage() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
+
+
+
+function copyAkun(index){
+
+    let item = akun[index];
+
+
+    navigator.clipboard.writeText(
+`Username : ${item.username}
+Password : ${item.password}
+Gmail : ${item.gmail}`
+    );
+
+
+    alert("Data berhasil dicopy!");
+
 }
 
-/* --- RENDERING --- */
-function renderAccounts() {
-  const grid = document.getElementById('accountGrid');
-  const emptyState = document.getElementById('emptyState');
-  const searchVal = document.getElementById('searchInput').value.toLowerCase();
 
-  const filtered = accounts.filter(acc => 
-    acc.usn.toLowerCase().includes(searchVal) || 
-    acc.spec.toLowerCase().includes(searchVal)
-  );
 
-  document.getElementById('totalCount').innerText = `${accounts.length} Akun`;
 
-  if (filtered.length === 0) {
-    grid.innerHTML = '';
-    emptyState.classList.remove('hidden');
-    return;
-  }
+function editAkun(index){
 
-  emptyState.classList.add('hidden');
-  grid.innerHTML = filtered.map(acc => `
-    <div class="bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-2xl p-5 flex flex-col justify-between transition group shadow-lg">
-      <div>
-        <div class="flex items-center justify-between pb-3 border-b border-gray-800/80 mb-3">
-          <div class="flex items-center gap-2">
-            ${getTagBadge(acc.tag)}
-            <h3 class="font-bold text-base text-white truncate max-w-[140px]">${escapeHtml(acc.usn)}</h3>
-          </div>
-          <div class="flex items-center gap-1">
-            <button onclick="editAccount('${acc.id}')" class="p-1.5 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition">
-              <i data-lucide="pencil" class="w-4 h-4"></i>
-            </button>
-            <button onclick="deleteAccount('${acc.id}')" class="p-1.5 text-gray-400 hover:text-red-400 rounded-md hover:bg-gray-800 transition">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
+    let item = akun[index];
 
-        <div class="space-y-2 mb-4 text-xs font-mono">
-          <div class="flex justify-between items-center bg-gray-800/40 px-2.5 py-1.5 rounded border border-gray-800">
-            <span class="text-gray-500">PW:</span>
-            <span class="text-gray-400">••••••••••••</span>
-          </div>
-          <div class="flex justify-between items-center bg-gray-800/40 px-2.5 py-1.5 rounded border border-gray-800">
-            <span class="text-gray-500">Gmail:</span>
-            <span class="text-gray-400">${maskEmail(acc.gmail)}</span>
-          </div>
-        </div>
 
-        <div class="mb-4">
-          <span class="text-[10px] uppercase font-semibold text-gray-500 tracking-wider block mb-1">Spesifikasi</span>
-          <p class="text-xs text-gray-300 line-clamp-2 bg-gray-950/50 p-2 rounded border border-gray-800/50">
-            ${acc.spec ? escapeHtml(acc.spec) : '<span class="italic text-gray-600">Tidak ada spesifikasi</span>'}
-          </p>
-        </div>
-      </div>
+    let username = prompt("Username Roblox:", item.username);
+    let password = prompt("Password Roblox:", item.password);
+    let gmail = prompt("Gmail:", item.gmail);
+    let ket = prompt("Keterangan:", item.keterangan);
 
-      <button 
-        onclick="showDetail('${acc.id}')" 
-        class="w-full bg-gray-800 hover:bg-red-600 hover:text-white text-gray-300 text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2 border border-gray-700/50 hover:border-red-600"
-      >
-        <i data-lucide="eye" class="w-4 h-4"></i> Lihat Detail
-      </button>
-    </div>
-  `).join('');
 
-  lucide.createIcons();
+    if(username){
+
+        akun[index] = {
+
+            username: username,
+            password: password,
+            gmail: gmail,
+            keterangan: ket
+
+        };
+
+
+        localStorage.setItem("akunRoblox", JSON.stringify(akun));
+
+        tampilkanAkun();
+
+    }
+
 }
 
-function getTagBadge(tag) {
-  if (tag === 'Utama') {
-    return `<span class="bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded">UTAMA</span>`;
-  } else if (tag === 'Sold') {
-    return `<span class="bg-gray-500/10 border border-gray-500/20 text-gray-400 text-[10px] font-bold px-2 py-0.5 rounded">SOLD</span>`;
-  }
-  return `<span class="bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded">READY</span>`;
-}
 
-function showDetail(id) {
-  const acc = accounts.find(a => a.id === id);
-  if (!acc) return;
 
-  document.getElementById('detailUsn').innerText = acc.usn;
-  document.getElementById('detailPw').innerText = acc.pw;
-  document.getElementById('detailGmail').innerText = acc.gmail;
-  document.getElementById('detailSpec').innerText = acc.spec || '-';
 
-  openModal('detailModal');
-}
+function hapusAkun(index){
 
-function openAddModal() {
-  document.getElementById('accountForm').reset();
-  document.getElementById('accountId').value = '';
-  document.getElementById('modalTitle').innerText = 'Tambah Akun Roblox';
-  openModal('accountModal');
-}
+    if(confirm("Hapus akun ini?")){
 
-function editAccount(id) {
-  const acc = accounts.find(a => a.id === id);
-  if (!acc) return;
+        akun.splice(index,1);
 
-  document.getElementById('accountId').value = acc.id;
-  document.getElementById('inputUsn').value = acc.usn;
-  document.getElementById('inputPw').value = acc.pw;
-  document.getElementById('inputGmail').value = acc.gmail;
-  document.getElementById('inputTag').value = acc.tag || 'Ready';
-  document.getElementById('inputSpec').value = acc.spec;
-  document.getElementById('modalTitle').innerText = 'Edit Akun Roblox';
+        localStorage.setItem("akunRoblox", JSON.stringify(akun));
 
-  openModal('accountModal');
-}
+        tampilkanAkun();
 
-function openModal(id) {
-  document.getElementById(id).classList.remove('hidden');
-}
+    }
 
-function closeModal(id) {
-  document.getElementById(id).classList.add('hidden');
-}
-
-function maskEmail(email) {
-  if (!email) return '••••@••••.com';
-  const parts = email.split('@');
-  if (parts.length < 2) return '••••••••';
-  return parts[0].substring(0, 2) + '••••@' + parts[1];
-}
-
-function escapeHtml(str) {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
-
-function copyToClipboard(elementId) {
-  const text = document.getElementById(elementId).innerText;
-  navigator.clipboard.writeText(text);
-  alert('Disalin ke clipboard!');
 }
